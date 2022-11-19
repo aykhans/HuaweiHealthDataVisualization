@@ -44,6 +44,7 @@ if st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
         heart_rate_grouped = heart_rate.groupby('date', sort=False).mean()['rate']
         x = heart_rate_grouped.keys()
         y = heart_rate_grouped.values
+        labels = {'x': 'Date of The Day', 'y': 'Average Heart Rate'}
 
     else:
         heart_rate = pd.DataFrame(heart_rate)
@@ -52,6 +53,7 @@ if st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
             heart_rate['time']
         ))
         y = heart_rate['rate']
+        labels = {'x': 'Date and Time', 'y': 'Heart Rate'}
 
 else:
     day = st.sidebar.date_input(
@@ -74,6 +76,7 @@ else:
         heart_rate['time']
     ))
     y = heart_rate['rate']
+    labels = {'x': 'Date and Time', 'y': 'Heart Rate'}
 
 st.sidebar.header('Split Data:')
 average_number = st.sidebar.number_input(
@@ -92,11 +95,17 @@ if average_number > 1:
         heart_rate2.append(sum(t) / len(t))
     x = range(len(heart_rate2))
     y = heart_rate2
+    labels = {'x': 'Number of Heart Rate', 'y': 'Heart Rate'}
 
+chart_type = st.sidebar.selectbox(
+    'Chart Type',
+    ('Line', 'Scatter', 'Bar')
+)
 
 st.plotly_chart(
-    px.line(
-        x = x, y = y
+    {'Line': px.line, 'Scatter': px.scatter, 'Bar': px.bar}[chart_type](
+        x = x, y = y,
+        labels = labels
     )
     .update_layout(
         xaxis = dict(
@@ -106,4 +115,8 @@ st.plotly_chart(
             type = "-" # ['-', 'linear', 'log', 'date', 'category', 'multicategory']
         )
     )
+)
+
+st.plotly_chart(
+    px.box(y = y, labels = {'y': 'Heart Rate'})
 )
