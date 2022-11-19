@@ -32,8 +32,26 @@ for d in data:
             }
         )
 
-if is_all_data := st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
-    heart_rate = pd.DataFrame(heart_rate)
+if st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
+    if st.sidebar.checkbox('Average of Days', False):
+        heart_rate = pd.DataFrame(
+            list(
+                map(
+                    lambda t: {'rate': t['rate'], 'date': t['time'].strftime("%d-%m-%Y")}, heart_rate
+                )
+            )
+        )
+        heart_rate_grouped = heart_rate.groupby('date', sort=False).mean()['rate']
+        x = heart_rate_grouped.keys()
+        y = heart_rate_grouped.values
+
+    else:
+        heart_rate = pd.DataFrame(heart_rate)
+        x = list(map(
+            lambda t: t.strftime("%d-%m-%Y %X"),
+            heart_rate['time']
+        ))
+        y = heart_rate['rate']
 
 else:
     day = st.sidebar.date_input(
@@ -51,11 +69,11 @@ else:
         )
     )
 
-x = list(map(
+    x = list(map(
         lambda t: t.strftime("%d-%m-%Y %X"),
         heart_rate['time']
     ))
-y = heart_rate['rate']
+    y = heart_rate['rate']
 
 st.sidebar.header('Split Data:')
 average_number = st.sidebar.number_input(
