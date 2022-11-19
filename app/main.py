@@ -28,12 +28,33 @@ for d in data:
                     ) + timedelta(
                             hours = int(data[0]['timeZone'][1:].replace('0', ''))
                         )
-                ).strftime("%d-%m-%Y %X")
+                )
             }
         )
 
-heart_rate = pd.DataFrame(heart_rate)
-x = heart_rate['time']
+if is_all_data := st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
+    heart_rate = pd.DataFrame(heart_rate)
+
+else:
+    day = st.sidebar.date_input(
+        'Select Day',
+        heart_rate[0]['time'],
+        min_value = heart_rate[0]['time'],
+        max_value = heart_rate[-1]['time']
+    ).strftime("%d-%m-%Y")
+
+    heart_rate = pd.DataFrame(
+        list(
+            filter(
+                lambda t: t['time'].strftime("%d-%m-%Y") == day, heart_rate
+            )
+        )
+    )
+
+x = list(map(
+        lambda t: t.strftime("%d-%m-%Y %X"),
+        heart_rate['time']
+    ))
 y = heart_rate['rate']
 
 st.sidebar.header('Split Data:')
@@ -53,6 +74,7 @@ if average_number > 1:
         heart_rate2.append(sum(t) / len(t))
     x = range(len(heart_rate2))
     y = heart_rate2
+
 
 st.plotly_chart(
     px.line(
