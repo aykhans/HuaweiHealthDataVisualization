@@ -1,21 +1,24 @@
 # sourcery skip: list-comprehension
+from pathlib import Path
+main_path: Path = Path(__file__).resolve().parent.parent
+
+from sys import path
+path.append(main_path)
+
 import pandas as pd
 import plotly.express as px
-import json
 import streamlit as st
 from datetime import (datetime,
                     timedelta)
-from pathlib import Path
+from data_access import LocalTestData
 
-
-data_dir = Path(__file__).resolve().parent.parent / 'data'
 
 st.set_page_config(page_title = 'Health Data Visualization',
                     page_icon = ':bar_chart:',
                     layout = 'wide')
 
-with open(data_dir / 'huawei_health_data.json') as f:
-    data = json.load(f)
+local_data = LocalTestData('data')
+data = local_data.get_data('huawei_health_data.json')
 
 heart_rate = []
 for d in data:
