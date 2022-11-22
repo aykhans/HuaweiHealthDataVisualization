@@ -2,21 +2,22 @@ import pandas as pd
 from datetime import (datetime,
                     timedelta)
 from typing import (List,
-                    Tuple)
+                    Tuple,
+                    Union)
 
 
 class DataOperations:
     heart_rate = None
 
     def is_data_none_wrapper(func):
-        def __is_data_none(self, *args, **kwargs) -> None | NameError:
+        def __is_data_none(self, *args, **kwargs) -> Union[None, NameError]:
             if self.data is None:
                 raise NameError(f'data not found. You must call the get_data function before calling the {func.__name__} function')
             return func(self, *args, **kwargs)
         return __is_data_none
 
     def is_heart_rate_none_wrapper(func):
-        def __is_heart_rate_none(self, *args, **kwargs) -> None | NameError:
+        def __is_heart_rate_none(self, *args, **kwargs) -> Union[None, NameError]:
             if self.heart_rate is None:
                 raise NameError(f'heart_rate data not found. You must call the get_heart_rate function before calling the {func.__name__} function')
             return func(self, *args, **kwargs)
