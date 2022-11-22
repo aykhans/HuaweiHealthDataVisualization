@@ -1,5 +1,5 @@
 ## Project Link
-https://ayxan-z-huaweihealthdatavisualization-appmain-vgn77h.streamlit.app/
+https://ayxan-z-huaweihealthdatavisualization-srcappmain-twt8o6.streamlit.app/
 
 ## Instalition
 **pip install -r requirements.txt <br />**
