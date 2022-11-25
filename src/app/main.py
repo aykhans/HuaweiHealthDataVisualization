@@ -8,24 +8,36 @@ if str(main_path) not in path:
 
 import plotly.express as px
 import streamlit as st
-from data_access import LocalDataAccess
+from data_access import (LocalDataAccess,
+                        UploadDataAccess)
 
 
 st.set_page_config(page_title = 'Health Data Visualization',
                     page_icon = ':bar_chart:',
                     layout = 'wide')
 
-local_data = LocalDataAccess('data')
-_ = local_data.get_data('huawei_health_data.json')
-heart_rate = local_data.get_heart_rate()
+upload_data = st.file_uploader('Choose a Huawei Health data',
+                                    type=['json'])
+
+if upload_data is None:
+    st.sidebar.caption('Local test data is being used')
+    data_access = LocalDataAccess('data')
+    data_access.data = 'huawei_health_data.json'
+
+else:
+    st.sidebar.caption('Uploaded data is being used')
+    data_access = UploadDataAccess()
+    data_access.data = upload_data
+
+heart_rate = data_access.heart_rate
 
 if st.sidebar.checkbox(f'All Data ({len(heart_rate)})', False):
     if st.sidebar.checkbox('Average of Days', False):
-        x, y = local_data.get_average_heart_rate_for_days_as_axis()
+        x, y = data_access.get_average_heart_rate_for_days_as_axis()
         labels = {'x': 'Date of The Day', 'y': 'Average Heart Rate'}
 
     else:
-        x, y = local_data.get_heart_rate_for_all_days_as_axis()
+        x, y = data_access.get_heart_rate_for_all_days_as_axis()
         labels = {'x': 'Date and Time', 'y': 'Heart Rate'}
 
 else:
@@ -36,7 +48,7 @@ else:
         max_value = heart_rate[-1]['time']
     ).strftime("%d-%m-%Y")
 
-    x, y = local_data.get_heart_rate_for_one_day(day)
+    x, y = data_access.get_heart_rate_for_one_day(day)
     labels = {'x': 'Date and Time', 'y': 'Heart Rate'}
 
 st.sidebar.header('Split Data:')
@@ -48,13 +60,19 @@ average_number = st.sidebar.number_input(
 )
 
 if average_number > 1:
-    x, y = local_data.get_averages_of_heart_rates(y, average_number)
+    x, y = data_access.get_averages_of_heart_rates(y, average_number)
     labels = {'x': 'Number of Heart Rate', 'y': 'Heart Rate'}
 
 chart_type = st.sidebar.selectbox(
     'Chart Type',
     ('Line', 'Scatter', 'Bar')
 )
+
+st.sidebar.header('Save as image')
+st.sidebar.caption('white pixels is min rate, black pixels is max rate, green is empty pixels')
+st.sidebar.download_button('Download',
+                        data=data_access.get_heart_rate_as_img(y),
+                        file_name='heart-rate.png')
 
 st.plotly_chart(
     {'Line': px.line, 'Scatter': px.scatter, 'Bar': px.bar}[chart_type](
